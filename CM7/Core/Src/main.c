@@ -868,7 +868,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    HAL_UART_Transmit(&huart3, "Hello World\r\n", 13, 0xFFFFFFF);
+    osDelay(1000);
   }
   /* USER CODE END 5 */
 }
