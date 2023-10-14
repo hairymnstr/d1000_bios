@@ -127,7 +127,7 @@ target_link_libraries(${PROJ_NAME}_CM7 PRIVATE c m)
 target_link_options(${PROJ_NAME}_CM7 PRIVATE
     ${CM7_CORE_FLAGS}
     -specs=nano.specs
-    -T${CMAKE_SOURCE_DIR}/CM4/STM32H745BITX_FLASH.ld
+    -T${CMAKE_SOURCE_DIR}/CM7/STM32H745BITX_FLASH.ld
     -Wl,-Map=${PROJ_NAME}.map,--cref
     -Wl,--gc-sections)
 
