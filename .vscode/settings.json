@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "stm32h7xx_hal_def.h": "c",
-        "stm32h7xx.h": "c"
+        "stm32h7xx.h": "c",
+        "freertos.h": "c",
+        "stm32h7xx_ll_usart.h": "c"
     }
 }

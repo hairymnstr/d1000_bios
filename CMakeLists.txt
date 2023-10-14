@@ -102,10 +102,12 @@ add_executable(${PROJ_NAME}_CM7
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
     ${CMAKE_SOURCE_DIR}/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c
-    ${CMAKE_SOURCE_DIR}/CM7/Core/Startup/startup_stm32h745bitx.s)
+    ${CMAKE_SOURCE_DIR}/CM7/Core/Startup/startup_stm32h745bitx.s
+    ${CMAKE_SOURCE_DIR}/application/common/src/uart_stdio.c)
 
 target_compile_definitions(${PROJ_NAME}_CM7 PRIVATE
     -DCORE_CM7
+    -DUSE_FULL_LL_DRIVER
     -DUSE_HAL_DRIVER
     -DSTM32H745xx)
 
@@ -114,7 +116,8 @@ target_include_directories(${PROJ_NAME}_CM7 PRIVATE
     ${COMMON_INCLUDES}
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
-    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F)
+    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+    ${CMAKE_SOURCE_DIR}/application/common/inc)
 
 target_compile_options(${PROJ_NAME}_CM7 PRIVATE
     ${CM7_CORE_FLAGS}
