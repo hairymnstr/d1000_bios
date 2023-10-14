@@ -22,6 +22,8 @@ That builds two images
 
 Currently the CM4 is not doing anything, the CM7 is running FreeRTOS with one task which does a simple blocking UART write once every second.
 
+I'm using an old Olimex ARM-USB-OCD JTAG adapter with the Olimex JTAG to SWD adapter, if you happen to have these the `flash_all.sh` script will flash both processors from the hex files.  If you're not using that particular programmer you should be able to modify the script fairly easily.  Watch out for STM32H7 support from other programmers not all SWD programmers can handle the multi-tap configuration in this processor.
+
 ## Current status
 
-So far this is just a framework, not actually tested on the computer.  Hopefully when I run it I'll see "Hello World" from the console UART header.
+The firmware as it stands prints "Hello World" every second on the Console UART header.
