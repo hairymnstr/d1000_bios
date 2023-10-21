@@ -40,13 +40,13 @@ int _write(int fd, const void *buf, size_t count)
         char last_char = '\0';
         for (size_t n = 0; n<count;n++)
         {
-            LL_USART_EnableIT_TXE(uart_stdio_uart);
             if ((char_buf[n] == '\n') && (last_char != '\r'))
             {
                 xQueueSendToBack(uart_stdio_tx_q, "\r", portMAX_DELAY);
             }
             xQueueSendToBack(uart_stdio_tx_q, &char_buf[n], portMAX_DELAY);
             last_char = char_buf[n];
+            LL_USART_EnableIT_TXE(uart_stdio_uart);
         }
         nwritten = count;
     }

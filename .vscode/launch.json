@@ -1,0 +1,44 @@
+{
+    "configurations": [
+        {
+            "name": "CPP Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/build/d1000_bios_CM7.elf",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": false,
+            "debugServerArgs": "-f interface/ftdi/olimex-arm-usb-ocd.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg -f target/stm32h7x_dual_bank.cfg",
+            "serverLaunchTimeout": 2000,
+            "filterStderr": true,
+            "filterStdout": false,
+            "stopAtConnect": false,
+            "serverStarted": "Listening on port 3333 for gdb connections",
+            "preLaunchTask": "",
+            "setupCommands": [
+                {
+                    "text": "-target-select remote localhost:3333",
+                    "description": "connect to target",
+                    "ignoreFailures": false
+                },
+                {
+                    "text": "load ${workspaceRoot}/build/d1000_bios_CM7.elf"
+                },
+            ],
+            "logging": {
+                "moduleLoad": true,
+                "trace": true,
+                "engineLogging": true,
+                "programOutput": true,
+                "exceptions": true
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "MIDebuggerPath": "${env:ARM_GCC_PATH}/arm-none-eabi-gdb",
+                "debugServerPath": "/usr/bin/openocd"
+            }
+        }
+    ]
+}

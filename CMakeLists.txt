@@ -103,7 +103,11 @@ add_executable(${PROJ_NAME}_CM7
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
     ${CMAKE_SOURCE_DIR}/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c
     ${CMAKE_SOURCE_DIR}/CM7/Core/Startup/startup_stm32h745bitx.s
-    ${CMAKE_SOURCE_DIR}/application/common/src/uart_stdio.c)
+    ${CMAKE_SOURCE_DIR}/application/common/src/uart_stdio.c
+    ${CMAKE_SOURCE_DIR}/application/common/src/syscall_gettimeofday.c
+    ${CMAKE_SOURCE_DIR}/application/common/src/commands/application_commands.c
+    ${CMAKE_SOURCE_DIR}/application/common/src/commands/cmd_ps.c
+    ${CMAKE_SOURCE_DIR}/application/common/src/commands/cmd_check_clocks.c)
 
 target_compile_definitions(${PROJ_NAME}_CM7 PRIVATE
     -DCORE_CM7
@@ -117,14 +121,16 @@ target_include_directories(${PROJ_NAME}_CM7 PRIVATE
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
-    ${CMAKE_SOURCE_DIR}/application/common/inc)
+    ${CMAKE_SOURCE_DIR}/application/common/inc
+    ${CMAKE_SOURCE_DIR}/application/common/inc/commands)
 
 target_compile_options(${PROJ_NAME}_CM7 PRIVATE
     ${CM7_CORE_FLAGS}
     -fdata-sections
     -ffunction-sections
     -Wall
-    -Wextra)
+    -Wextra
+    -g -Os)
 
 target_link_libraries(${PROJ_NAME}_CM7 PRIVATE c m)
 target_link_options(${PROJ_NAME}_CM7 PRIVATE
@@ -132,7 +138,7 @@ target_link_options(${PROJ_NAME}_CM7 PRIVATE
     -specs=nano.specs
     -T${CMAKE_SOURCE_DIR}/CM7/STM32H745BITX_FLASH.ld
     -Wl,-Map=${PROJ_NAME}.map,--cref
-    -Wl,--gc-sections)
+    -Wl,--gc-sections -g)
 
 add_custom_command(TARGET ${PROJ_NAME}_CM7
     POST_BUILD
@@ -140,3 +146,6 @@ add_custom_command(TARGET ${PROJ_NAME}_CM7
     COMMAND ${CMAKE_OBJCOPY} -O ihex ${PROJ_NAME}_CM7 ${PROJ_NAME}_CM7.hex ${CUSTOM_MAKE_HEX_FLAGS} 
     COMMAND ${CMAKE_OBJCOPY} -O binary ${PROJ_NAME}_CM7 ${PROJ_NAME}_CM7.bin ${CUSTOM_MAKE_BIN_FLAGS}
 )
+
+set(PROJ_NAME ${PROJ_NAME}_CM7)
+find_package(drash REQUIRED PATHS ${CMAKE_SOURCE_DIR}/application/libs/drash)

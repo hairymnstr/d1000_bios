@@ -8,7 +8,10 @@
                 "CM7/Core/Inc",
                 "application/common/inc",
                 "Drivers/STM32H7xx_HAL_Driver/Inc",
-                "Drivers/CMSIS/Device/ST/STM32H7xx/Include"
+                "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
+                "application/common/inc",
+                "application/common/inc/commands",
+                "application/common/libs/drash/inc"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
