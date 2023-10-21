@@ -26,4 +26,8 @@ I'm using an old Olimex ARM-USB-OCD JTAG adapter with the Olimex JTAG to SWD ada
 
 ## Current status
 
-The firmware as it stands prints "Hello World" every second on the Console UART header.
+There's a minimal command line interface on the Console UART at 115200, 8n1.  I'm using Putty in serial monitor mode as a terminal.  At the moment just a few commands are implemented:
+
+* ps - gives a summary of the FreeRTOS task status
+* check-clocks - list the status of the RTOS tick, RTC clock and the profiling clock
+* dummy - just lists all the arguments passed to it for testing the CLI tokeniser
