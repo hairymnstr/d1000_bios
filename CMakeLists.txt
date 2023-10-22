@@ -105,6 +105,7 @@ add_executable(${PROJ_NAME}_CM7
     ${CMAKE_SOURCE_DIR}/CM7/Core/Startup/startup_stm32h745bitx.s
     ${CMAKE_SOURCE_DIR}/application/common/src/uart_stdio.c
     ${CMAKE_SOURCE_DIR}/application/common/src/syscall_gettimeofday.c
+    ${CMAKE_SOURCE_DIR}/application/common/src/fault_handlers.c
     ${CMAKE_SOURCE_DIR}/application/common/src/commands/application_commands.c
     ${CMAKE_SOURCE_DIR}/application/common/src/commands/cmd_ps.c
     ${CMAKE_SOURCE_DIR}/application/common/src/commands/cmd_check_clocks.c)

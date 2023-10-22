@@ -3,6 +3,11 @@
         "stm32h7xx_hal_def.h": "c",
         "stm32h7xx.h": "c",
         "freertos.h": "c",
-        "stm32h7xx_ll_usart.h": "c"
+        "stm32h7xx_ll_usart.h": "c",
+        "main.h": "c",
+        "stm32h7xx_hal.h": "c",
+        "stm32h7xx_hal_conf.h": "c",
+        "stm32h7xx_hal_rcc.h": "c",
+        "stm32_hal_legacy.h": "c"
     }
 }

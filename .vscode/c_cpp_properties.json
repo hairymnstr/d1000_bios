@@ -9,6 +9,7 @@
                 "application/common/inc",
                 "Drivers/STM32H7xx_HAL_Driver/Inc",
                 "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
+                "Drivers/CMSIS/Include",
                 "application/common/inc",
                 "application/common/inc/commands",
                 "application/common/libs/drash/inc"
