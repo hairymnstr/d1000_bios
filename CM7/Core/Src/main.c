@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -52,6 +52,9 @@ RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim5;
 
+SDRAM_HandleTypeDef hsdram1;
+SDRAM_HandleTypeDef hsdram2;
+
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -60,7 +63,7 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
+FMC_SDRAM_CommandTypeDef command;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,10 +72,11 @@ static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_RTC_Init(void);
+static void MX_FMC_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -96,10 +100,11 @@ int main(void)
 /* USER CODE BEGIN Boot_Mode_Sequence_1 */
   /* Wait until CPU2 boots and enters in stop mode or timeout*/
   timeout = 0xFFFF;
-  while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0));
-  if ( timeout < 0 )
+  while ((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0))
+    ;
+  if (timeout < 0)
   {
-  Error_Handler();
+    Error_Handler();
   }
 /* USER CODE END Boot_Mode_Sequence_1 */
   /* MCU Configuration--------------------------------------------------------*/
@@ -114,21 +119,22 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 /* USER CODE BEGIN Boot_Mode_Sequence_2 */
-/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
-HSEM notification */
-/*HW semaphore Clock enable*/
-__HAL_RCC_HSEM_CLK_ENABLE();
-/*Take HSEM */
-HAL_HSEM_FastTake(HSEM_ID_0);
-/*Release HSEM in order to notify the CPU2(CM4)*/
-HAL_HSEM_Release(HSEM_ID_0,0);
-/* wait until CPU2 wakes up from stop mode */
-timeout = 0xFFFF;
-while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0));
-if ( timeout < 0 )
-{
-Error_Handler();
-}
+  /* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
+  HSEM notification */
+  /*HW semaphore Clock enable*/
+  __HAL_RCC_HSEM_CLK_ENABLE();
+  /*Take HSEM */
+  HAL_HSEM_FastTake(HSEM_ID_0);
+  /*Release HSEM in order to notify the CPU2(CM4)*/
+  HAL_HSEM_Release(HSEM_ID_0, 0);
+  /* wait until CPU2 wakes up from stop mode */
+  timeout = 0xFFFF;
+  while ((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0))
+    ;
+  if (timeout < 0)
+  {
+    Error_Handler();
+  }
 /* USER CODE END Boot_Mode_Sequence_2 */
 
   /* USER CODE BEGIN SysInit */
@@ -140,6 +146,7 @@ Error_Handler();
   MX_USART3_UART_Init();
   MX_TIM5_Init();
   MX_RTC_Init();
+  MX_FMC_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -446,6 +453,82 @@ static void MX_USART3_UART_Init(void)
 
 }
 
+/* FMC initialization function */
+void MX_FMC_Init(void)
+{
+
+  /* USER CODE BEGIN FMC_Init 0 */
+
+  /* USER CODE END FMC_Init 0 */
+
+  FMC_SDRAM_TimingTypeDef SdramTiming = {0};
+
+  /* USER CODE BEGIN FMC_Init 1 */
+
+  /* USER CODE END FMC_Init 1 */
+
+  /** Perform the SDRAM1 memory initialization sequence
+  */
+  hsdram1.Instance = FMC_SDRAM_DEVICE;
+  /* hsdram1.Init */
+  hsdram1.Init.SDBank = FMC_SDRAM_BANK1;
+  hsdram1.Init.ColumnBitsNumber = FMC_SDRAM_COLUMN_BITS_NUM_9;
+  hsdram1.Init.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_13;
+  hsdram1.Init.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_32;
+  hsdram1.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
+  hsdram1.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_3;
+  hsdram1.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
+  hsdram1.Init.SDClockPeriod = FMC_SDRAM_CLOCK_PERIOD_2;
+  hsdram1.Init.ReadBurst = FMC_SDRAM_RBURST_DISABLE;
+  hsdram1.Init.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_0;
+  /* SdramTiming */
+  SdramTiming.LoadToActiveDelay = 2;
+  SdramTiming.ExitSelfRefreshDelay = 7;
+  SdramTiming.SelfRefreshTime = 4;
+  SdramTiming.RowCycleDelay = 7;
+  SdramTiming.WriteRecoveryTime = 3;
+  SdramTiming.RPDelay = 2;
+  SdramTiming.RCDDelay = 2;
+
+  if (HAL_SDRAM_Init(&hsdram1, &SdramTiming) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+  /** Perform the SDRAM2 memory initialization sequence
+  */
+  hsdram2.Instance = FMC_SDRAM_DEVICE;
+  /* hsdram2.Init */
+  hsdram2.Init.SDBank = FMC_SDRAM_BANK2;
+  hsdram2.Init.ColumnBitsNumber = FMC_SDRAM_COLUMN_BITS_NUM_9;
+  hsdram2.Init.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_13;
+  hsdram2.Init.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_32;
+  hsdram2.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
+  hsdram2.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_3;
+  hsdram2.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
+  hsdram2.Init.SDClockPeriod = FMC_SDRAM_CLOCK_PERIOD_2;
+  hsdram2.Init.ReadBurst = FMC_SDRAM_RBURST_DISABLE;
+  hsdram2.Init.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_0;
+  /* SdramTiming */
+  SdramTiming.LoadToActiveDelay = 2;
+  SdramTiming.ExitSelfRefreshDelay = 7;
+  SdramTiming.SelfRefreshTime = 4;
+  SdramTiming.RowCycleDelay = 7;
+  SdramTiming.WriteRecoveryTime = 3;
+  SdramTiming.RPDelay = 2;
+  SdramTiming.RCDDelay = 2;
+
+  if (HAL_SDRAM_Init(&hsdram2, &SdramTiming) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+  /* USER CODE BEGIN FMC_Init 2 */
+  SDRAM_Initialization_Sequence(&hsdram1, &command);
+  // SDRAM_Initialization_Sequence(&hsdram2, &command);
+  /* USER CODE END FMC_Init 2 */
+}
+
 /**
   * @brief GPIO Initialization Function
   * @param None
@@ -457,31 +540,133 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+/**
+ * @brief  Perform the SDRAM exernal memory inialization sequence
+ * @param  hsdram: SDRAM handle
+ * @param  Command: Pointer to SDRAM command structure
+ * @retval None
+ */
+static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command)
+{
+  __IO uint32_t tmpmrd = 0;
+  /* Step 3:  Configure a clock configuration enable command */
+  Command->CommandMode = FMC_SDRAM_CMD_CLK_ENABLE;
+  Command->CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1_2;
+  Command->AutoRefreshNumber = 1;
+  Command->ModeRegisterDefinition = 0;
 
+  /* Send the command */
+  configASSERT(HAL_SDRAM_SendCommand(hsdram, Command, 0x1000) == HAL_OK);
+
+  /* Step 4: Insert 100 ms delay */
+  HAL_Delay(100);
+
+  /* Step 5: Configure a PALL (precharge all) command */
+  Command->CommandMode = FMC_SDRAM_CMD_PALL;
+  Command->CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1_2;
+  Command->AutoRefreshNumber = 1;
+  Command->ModeRegisterDefinition = 0;
+
+  /* Send the command */
+  configASSERT(HAL_SDRAM_SendCommand(hsdram, Command, 0x1000) == HAL_OK);
+
+  /* Step 6 : Configure a Auto-Refresh command */
+  Command->CommandMode = FMC_SDRAM_CMD_AUTOREFRESH_MODE;
+  Command->CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1_2;
+  Command->AutoRefreshNumber = 4;
+  Command->ModeRegisterDefinition = 0;
+
+  /* Send the command */
+  configASSERT(HAL_SDRAM_SendCommand(hsdram, Command, 0x1000) == HAL_OK);
+
+  /* Step 7: Program the external memory mode register */
+  tmpmrd = (uint32_t)SDRAM_MODEREG_BURST_LENGTH_2 |
+           SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL |
+           SDRAM_MODEREG_CAS_LATENCY_3 |
+           SDRAM_MODEREG_OPERATING_MODE_STANDARD |
+           SDRAM_MODEREG_WRITEBURST_MODE_SINGLE;
+
+  Command->CommandMode = FMC_SDRAM_CMD_LOAD_MODE;
+  Command->CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1_2;
+  Command->AutoRefreshNumber = 1;
+  Command->ModeRegisterDefinition = tmpmrd;
+
+  /* Send the command */
+  configASSERT(HAL_SDRAM_SendCommand(hsdram, Command, 0x1000) == HAL_OK);
+
+  /* Step 8: Set the refresh rate counter */
+  /* Set the device refresh counter */
+  configASSERT(HAL_SDRAM_ProgramRefreshRate(hsdram, REFRESH_COUNT) == HAL_OK);
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the defaultTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   uart_stdio_init(USART3);
+
+  printf("Memory check\n");
+  int bank1_okay = 1;
+  for (uint32_t *ptr = (uint32_t *)0xc0000000;ptr < (uint32_t *)0xc4000000;ptr++)
+  {
+    *ptr = (uint32_t)ptr;
+  }
+  for (uint32_t *ptr = (uint32_t *)0xc0000000;ptr < (uint32_t *)0xc4000000;ptr++)
+  {
+    if (*ptr != (uint32_t)ptr)
+    {
+      printf("Mem check failed at %p\n", ptr);
+      printf("*ptr = 0x%x ptr = %p\n", (unsigned int)(*ptr), ptr);
+      bank1_okay = 0;
+      break;
+    }
+  }
+  if (bank1_okay)
+  {
+    printf("Bank 1 64M, okay\n");
+  }
+  int bank2_okay = 1;
+  for (uint32_t *ptr = (uint32_t *)0xd0000000;ptr < (uint32_t *)0xd4000000;ptr++)
+  {
+    *ptr = (uint32_t)ptr;
+  }
+  for (uint32_t *ptr = (uint32_t *)0xd0000000;ptr < (uint32_t *)0xd4000000;ptr++)
+  {
+    if (*ptr != (uint32_t)ptr)
+    {
+      printf("Mem check failed at %p\n", ptr);
+      bank2_okay = 0;
+      break;
+    }
+  }
+  if (bank2_okay)
+  {
+    printf("Bank 2 64M, okay\n");
+  }
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
     drash();
   }
