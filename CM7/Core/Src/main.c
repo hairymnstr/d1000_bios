@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include "uart_stdio.h"
 #include "drash.h"
+#include "expansion_bus.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +49,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+I2C_HandleTypeDef hi2c2;
+
 RTC_HandleTypeDef hrtc;
+
+SPI_HandleTypeDef hspi5;
 
 TIM_HandleTypeDef htim5;
 
@@ -73,6 +78,8 @@ static void MX_USART3_UART_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_RTC_Init(void);
 static void MX_FMC_Init(void);
+static void MX_I2C2_Init(void);
+static void MX_SPI5_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -149,6 +156,8 @@ int main(void)
   MX_TIM5_Init();
   MX_RTC_Init();
   MX_FMC_Init();
+  MX_I2C2_Init();
+  MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -259,6 +268,54 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.Timing = 0x307075B1;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
   * @brief RTC Initialization Function
   * @param None
   * @retval None
@@ -319,6 +376,54 @@ static void MX_RTC_Init(void)
   /* USER CODE BEGIN RTC_Init 2 */
 
   /* USER CODE END RTC_Init 2 */
+
+}
+
+/**
+  * @brief SPI5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI5_Init(void)
+{
+
+  /* USER CODE BEGIN SPI5_Init 0 */
+
+  /* USER CODE END SPI5_Init 0 */
+
+  /* USER CODE BEGIN SPI5_Init 1 */
+
+  /* USER CODE END SPI5_Init 1 */
+  /* SPI5 parameter configuration*/
+  hspi5.Instance = SPI5;
+  hspi5.Init.Mode = SPI_MODE_MASTER;
+  hspi5.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi5.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi5.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi5.Init.NSS = SPI_NSS_SOFT;
+  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi5.Init.CRCPolynomial = 0x0;
+  hspi5.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  hspi5.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
+  hspi5.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
+  hspi5.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+  hspi5.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
+  hspi5.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
+  hspi5.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
+  hspi5.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
+  hspi5.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+  hspi5.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+  if (HAL_SPI_Init(&hspi5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI5_Init 2 */
+
+  /* USER CODE END SPI5_Init 2 */
 
 }
 
@@ -538,19 +643,62 @@ void MX_FMC_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOI_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(EXT_SPI_CS1_GPIO_Port, EXT_SPI_CS1_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(EXT_RST_GPIO_Port, EXT_RST_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(EXT_SPI_CS0_GPIO_Port, EXT_SPI_CS0_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : EXT_SPI_CS1_Pin */
+  GPIO_InitStruct.Pin = EXT_SPI_CS1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(EXT_SPI_CS1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : EXT_RST_Pin */
+  GPIO_InitStruct.Pin = EXT_RST_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(EXT_RST_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PWR_BTN_Pin */
+  GPIO_InitStruct.Pin = PWR_BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(PWR_BTN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : EXT_SPI_CS0_Pin */
+  GPIO_InitStruct.Pin = EXT_SPI_CS0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(EXT_SPI_CS0_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : EXT_INT_Pin */
+  GPIO_InitStruct.Pin = EXT_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(EXT_INT_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -629,6 +777,21 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
   uart_stdio_init(USART3);
 
+  expansion_config_t conf = {
+    .cs0_pin = EXT_SPI_CS0_Pin,
+    .cs0_port = EXT_SPI_CS0_GPIO_Port,
+    .cs1_pin = EXT_SPI_CS1_Pin,
+    .cs1_port = EXT_SPI_CS1_GPIO_Port,
+    .hi2c = &hi2c2,
+    .hspi = &hspi5,
+    .rst_port = EXT_RST_GPIO_Port,
+    .rst_pin = EXT_RST_Pin,
+  };
+
+  expansion_ctx_t *exp = expansion_bus_init(&conf);
+
+  expansion_bus_set_led(exp, 0x15);
+
   printf("Memory check\n");
   int bank1_okay = 1;
   for (uint32_t *ptr = (uint32_t *)0xc0000000;ptr < (uint32_t *)0xc4000000;ptr++)
@@ -667,6 +830,7 @@ void StartDefaultTask(void *argument)
   {
     printf("Bank 2 64M, okay\n");
   }
+  expansion_bus_set_led(exp, 0x0A);
   /* Infinite loop */
   for (;;)
   {

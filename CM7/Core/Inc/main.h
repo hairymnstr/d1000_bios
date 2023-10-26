@@ -69,6 +69,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define EXT_SPI_CS1_Pin GPIO_PIN_2
+#define EXT_SPI_CS1_GPIO_Port GPIOE
+#define EXT_RST_Pin GPIO_PIN_8
+#define EXT_RST_GPIO_Port GPIOI
+#define PWR_BTN_Pin GPIO_PIN_13
+#define PWR_BTN_GPIO_Port GPIOC
+#define EXT_SPI_CS0_Pin GPIO_PIN_6
+#define EXT_SPI_CS0_GPIO_Port GPIOF
+#define EXT_SPI_SCK_Pin GPIO_PIN_7
+#define EXT_SPI_SCK_GPIO_Port GPIOF
+#define EXT_SPI_CIPO_Pin GPIO_PIN_8
+#define EXT_SPI_CIPO_GPIO_Port GPIOF
+#define EXT_SPI_COPI_Pin GPIO_PIN_9
+#define EXT_SPI_COPI_GPIO_Port GPIOF
+#define EXT_INT_Pin GPIO_PIN_3
+#define EXT_INT_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define SDRAM_MODEREG_BURST_LENGTH_1             ((uint16_t)0x0000)
