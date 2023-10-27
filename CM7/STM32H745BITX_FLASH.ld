@@ -50,6 +50,8 @@ MEMORY
   RAM_D2 (xrw)   : ORIGIN = 0x30000000, LENGTH = 288K
   RAM_D3 (xrw)   : ORIGIN = 0x38000000, LENGTH = 64K
   ITCMRAM (xrw)  : ORIGIN = 0x00000000, LENGTH = 64K
+  SDRAM1 (xrw)   : ORIGIN = 0x70000000, LENGTH = 64M
+  SDRAM2 (xrw)   : ORIGIN = 0xD0000000, LENGTH = 64M
 }
 
 /* Sections */
@@ -148,6 +150,17 @@ SECTIONS
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
   } >RAM_D1 AT> FLASH
+
+  _sisdram1 = LOADADDR(.dram1);
+
+  .dram1 :
+  {
+    . = ALIGN(4);
+    _ssdram1 = .;
+    *(.sdram1*)
+    . = ALIGN(4);
+    _esdram1 = .;
+  } >SDRAM1 AT> FLASH
 
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);

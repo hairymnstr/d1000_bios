@@ -345,7 +345,7 @@ void vApplicationStackOverflowHook(xTaskHandle xTask __attribute__((__unused__))
  */
 void fault_assert(const char *file, unsigned int line)
 {
-    xPortRaisePrivilege();
+    // xPortRaisePrivilege();
     portDISABLE_INTERRUPTS();
 
     fault_std_out_init();

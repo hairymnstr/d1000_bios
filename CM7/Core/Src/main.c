@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 #include "uart_stdio.h"
 #include "drash.h"
 #include "expansion_bus.h"
@@ -763,6 +764,25 @@ static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM
   /* Set the device refresh counter */
   configASSERT(HAL_SDRAM_ProgramRefreshRate(hsdram, REFRESH_COUNT) == HAL_OK);
 }
+
+int dram_sum(int a, int b) __attribute__((section (".sdram1")));
+
+int dram_sum(int a, int b)
+{
+  printf("This function is located at %p\n", dram_sum);
+  printf("dram_sum(%d, %d) = %d\n", a, b, a + b);
+  return a + b;
+}
+
+void copy_dram_funcs(void)
+{
+  extern uint32_t _sisdram1;
+  extern uint32_t _ssdram1;
+  extern uint32_t _esdram1;
+
+  uint32_t dram_func_size = (uint32_t)(&_esdram1 - &_ssdram1);
+  memcpy(&_ssdram1, &_sisdram1, dram_func_size * sizeof(uint32_t));
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -794,11 +814,11 @@ void StartDefaultTask(void *argument)
 
   printf("Memory check\n");
   int bank1_okay = 1;
-  for (uint32_t *ptr = (uint32_t *)0xc0000000;ptr < (uint32_t *)0xc4000000;ptr++)
+  for (uint32_t *ptr = (uint32_t *)0xC0000000;ptr < (uint32_t *)0xC4000000;ptr++)
   {
     *ptr = (uint32_t)ptr;
   }
-  for (uint32_t *ptr = (uint32_t *)0xc0000000;ptr < (uint32_t *)0xc4000000;ptr++)
+  for (uint32_t *ptr = (uint32_t *)0xC0000000;ptr < (uint32_t *)0xC4000000;ptr++)
   {
     if (*ptr != (uint32_t)ptr)
     {
@@ -813,11 +833,11 @@ void StartDefaultTask(void *argument)
     printf("Bank 1 64M, okay\n");
   }
   int bank2_okay = 1;
-  for (uint32_t *ptr = (uint32_t *)0xd0000000;ptr < (uint32_t *)0xd4000000;ptr++)
+  for (uint32_t *ptr = (uint32_t *)0xD0000000;ptr < (uint32_t *)0xD4000000;ptr++)
   {
     *ptr = (uint32_t)ptr;
   }
-  for (uint32_t *ptr = (uint32_t *)0xd0000000;ptr < (uint32_t *)0xd4000000;ptr++)
+  for (uint32_t *ptr = (uint32_t *)0xD0000000;ptr < (uint32_t *)0xD4000000;ptr++)
   {
     if (*ptr != (uint32_t)ptr)
     {
@@ -831,6 +851,11 @@ void StartDefaultTask(void *argument)
     printf("Bank 2 64M, okay\n");
   }
   expansion_bus_set_led(exp, 0x0A);
+
+  copy_dram_funcs();
+
+  printf("DRAM test %d + %d = %d\n", 207, 123, dram_sum(207, 123));
+
   /* Infinite loop */
   for (;;)
   {
@@ -888,6 +913,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  fault_assert(file, line);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
