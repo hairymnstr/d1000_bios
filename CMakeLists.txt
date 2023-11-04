@@ -88,9 +88,15 @@ add_custom_command(TARGET ${PROJ_NAME}_CM4
 )
 
 file(GLOB_RECURSE CM7_CORE_SRC ${CMAKE_SOURCE_DIR}/CM7/Core/Src/**.c)
+file(GLOB_RECURSE FATFS_SRC ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FatFs/src/**.c)
 add_executable(${PROJ_NAME}_CM7
     ${CM7_CORE_SRC}
     ${DRIVER_FILES}
+    ${FATFS_SRC}
+    ${CMAKE_SOURCE_DIR}/CM7/FATFS/App/fatfs.c
+    ${CMAKE_SOURCE_DIR}/CM7/FATFS/Target/bsp_driver_sd.c
+    ${CMAKE_SOURCE_DIR}/CM7/FATFS/Target/fatfs_platform.c
+    ${CMAKE_SOURCE_DIR}/CM7/FATFS/Target/sd_diskio.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/croutine.c
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c
@@ -120,6 +126,9 @@ target_compile_definitions(${PROJ_NAME}_CM7 PRIVATE
 target_include_directories(${PROJ_NAME}_CM7 PRIVATE
     ${CMAKE_SOURCE_DIR}/CM7/Core/Inc
     ${COMMON_INCLUDES}
+    ${CMAKE_SOURCE_DIR}/CM7/FATFS/App
+    ${CMAKE_SOURCE_DIR}/CM7/FATFS/Target
+    ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FatFs/src
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2
     ${CMAKE_SOURCE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F

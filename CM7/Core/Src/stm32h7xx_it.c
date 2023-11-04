@@ -56,6 +56,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern SD_HandleTypeDef hsd2;
 extern TIM_HandleTypeDef htim17;
 
 /* USER CODE BEGIN EV */
@@ -125,6 +126,20 @@ void TIM17_IRQHandler(void)
   /* USER CODE BEGIN TIM17_IRQn 1 */
 
   /* USER CODE END TIM17_IRQn 1 */
+}
+
+/**
+  * @brief This function handles SDMMC2 global interrupt.
+  */
+void SDMMC2_IRQHandler(void)
+{
+  /* USER CODE BEGIN SDMMC2_IRQn 0 */
+
+  /* USER CODE END SDMMC2_IRQn 0 */
+  HAL_SD_IRQHandler(&hsd2);
+  /* USER CODE BEGIN SDMMC2_IRQn 1 */
+
+  /* USER CODE END SDMMC2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

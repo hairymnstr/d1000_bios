@@ -83,6 +83,14 @@ void Error_Handler(void);
 #define EXT_SPI_CIPO_GPIO_Port GPIOF
 #define EXT_SPI_COPI_Pin GPIO_PIN_9
 #define EXT_SPI_COPI_GPIO_Port GPIOF
+#define INT_SD_EN_Pin GPIO_PIN_7
+#define INT_SD_EN_GPIO_Port GPIOJ
+#define INT_SD_OC_Pin GPIO_PIN_9
+#define INT_SD_OC_GPIO_Port GPIOJ
+#define INT_SD_WP_Pin GPIO_PIN_1
+#define INT_SD_WP_GPIO_Port GPIOK
+#define INT_SD_CP_Pin GPIO_PIN_3
+#define INT_SD_CP_GPIO_Port GPIOG
 #define EXT_INT_Pin GPIO_PIN_3
 #define EXT_INT_GPIO_Port GPIOB
 

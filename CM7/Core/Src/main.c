@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,6 +55,8 @@ I2C_HandleTypeDef hi2c2;
 
 RTC_HandleTypeDef hrtc;
 
+SD_HandleTypeDef hsd2;
+
 SPI_HandleTypeDef hspi5;
 
 TIM_HandleTypeDef htim5;
@@ -81,6 +84,7 @@ static void MX_RTC_Init(void);
 static void MX_FMC_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_SPI5_Init(void);
+static void MX_SDMMC2_SD_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -159,6 +163,8 @@ int main(void)
   MX_FMC_Init();
   MX_I2C2_Init();
   MX_SPI5_Init();
+  MX_SDMMC2_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -377,6 +383,37 @@ static void MX_RTC_Init(void)
   /* USER CODE BEGIN RTC_Init 2 */
 
   /* USER CODE END RTC_Init 2 */
+
+}
+
+/**
+  * @brief SDMMC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SDMMC2_SD_Init(void)
+{
+
+  /* USER CODE BEGIN SDMMC2_Init 0 */
+
+  /* USER CODE END SDMMC2_Init 0 */
+
+  /* USER CODE BEGIN SDMMC2_Init 1 */
+
+  /* USER CODE END SDMMC2_Init 1 */
+  hsd2.Instance = SDMMC2;
+  hsd2.Init.ClockEdge = SDMMC_CLOCK_EDGE_RISING;
+  hsd2.Init.ClockPowerSave = SDMMC_CLOCK_POWER_SAVE_DISABLE;
+  hsd2.Init.BusWide = SDMMC_BUS_WIDE_4B;
+  hsd2.Init.HardwareFlowControl = SDMMC_HARDWARE_FLOW_CONTROL_DISABLE;
+  hsd2.Init.ClockDiv = 3;
+  if (HAL_SD_Init(&hsd2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SDMMC2_Init 2 */
+
+  /* USER CODE END SDMMC2_Init 2 */
 
 }
 
@@ -657,6 +694,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOJ_CLK_ENABLE();
+  __HAL_RCC_GPIOK_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -667,6 +706,9 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(EXT_SPI_CS0_GPIO_Port, EXT_SPI_CS0_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(INT_SD_EN_GPIO_Port, INT_SD_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : EXT_SPI_CS1_Pin */
   GPIO_InitStruct.Pin = EXT_SPI_CS1_Pin;
@@ -694,6 +736,31 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(EXT_SPI_CS0_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : INT_SD_EN_Pin */
+  GPIO_InitStruct.Pin = INT_SD_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(INT_SD_EN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : INT_SD_OC_Pin */
+  GPIO_InitStruct.Pin = INT_SD_OC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(INT_SD_OC_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : INT_SD_WP_Pin */
+  GPIO_InitStruct.Pin = INT_SD_WP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(INT_SD_WP_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : INT_SD_CP_Pin */
+  GPIO_InitStruct.Pin = INT_SD_CP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(INT_SD_CP_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : EXT_INT_Pin */
   GPIO_InitStruct.Pin = EXT_INT_Pin;
@@ -791,6 +858,10 @@ void copy_dram_funcs(void)
  * @param  argument: Not used
  * @retval None
  */
+
+FATFS fs;
+DIR dp;
+FILINFO fno;
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
@@ -856,6 +927,22 @@ void StartDefaultTask(void *argument)
 
   printf("DRAM test %d + %d = %d\n", 207, 123, dram_sum(207, 123));
 
+  printf("List a directory\n");
+
+  printf("f_mount = %d\n", (int)f_mount(&fs, "", 1));
+
+  printf("f_opendir = %d\n", (int)f_opendir(&dp, "/"));
+
+  while (1)
+  {
+    f_readdir(&dp, &fno);
+    if (strlen(fno.fname) == 0)
+    {
+      break;
+    }
+    printf("%s\n", fno.fname);
+  }
+  
   /* Infinite loop */
   for (;;)
   {

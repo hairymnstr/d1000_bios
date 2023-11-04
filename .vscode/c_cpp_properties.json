@@ -12,7 +12,10 @@
                 "Drivers/CMSIS/Include",
                 "application/common/inc",
                 "application/common/inc/commands",
-                "application/common/libs/drash/inc"
+                "application/common/libs/drash/inc",
+                "CM7/FATFS/App",
+                "CM7/FATFS/Target",
+                "Middlewares/Third_Party/FatFs/src"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
