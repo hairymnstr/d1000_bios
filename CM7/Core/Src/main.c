@@ -40,6 +40,7 @@
 
 #ifndef HSEM_ID_0
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
+#define HSEM_ID_1 (1U)
 #endif
 
 /* USER CODE END PD */
@@ -77,6 +78,7 @@ FMC_SDRAM_CommandTypeDef command;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_TIM5_Init(void);
@@ -132,6 +134,9 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+
+/* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
 /* USER CODE BEGIN Boot_Mode_Sequence_2 */
   /* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
   HSEM notification */
@@ -139,6 +144,7 @@ int main(void)
   __HAL_RCC_HSEM_CLK_ENABLE();
   /*Take HSEM */
   HAL_HSEM_FastTake(HSEM_ID_0);
+  HAL_HSEM_FastTake(HSEM_ID_1);   // mutex for SDRAM2
   /*Release HSEM in order to notify the CPU2(CM4)*/
   HAL_HSEM_Release(HSEM_ID_0, 0);
   /* wait until CPU2 wakes up from stop mode */
@@ -269,6 +275,33 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO2SOURCE_PLL2PCLK, RCC_MCODIV_1);
+}
+
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_FMC;
+  PeriphClkInitStruct.PLL2.PLL2M = 5;
+  PeriphClkInitStruct.PLL2.PLL2N = 120;
+  PeriphClkInitStruct.PLL2.PLL2P = 12;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 3;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
@@ -557,7 +590,7 @@ static void MX_USART3_UART_Init(void)
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
   LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
@@ -621,10 +654,10 @@ void MX_FMC_Init(void)
   hsdram1.Init.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_13;
   hsdram1.Init.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_32;
   hsdram1.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
-  hsdram1.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_3;
+  hsdram1.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_2;
   hsdram1.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
   hsdram1.Init.SDClockPeriod = FMC_SDRAM_CLOCK_PERIOD_2;
-  hsdram1.Init.ReadBurst = FMC_SDRAM_RBURST_DISABLE;
+  hsdram1.Init.ReadBurst = FMC_SDRAM_RBURST_ENABLE;
   hsdram1.Init.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_0;
   /* SdramTiming */
   SdramTiming.LoadToActiveDelay = 2;
@@ -649,10 +682,10 @@ void MX_FMC_Init(void)
   hsdram2.Init.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_13;
   hsdram2.Init.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_32;
   hsdram2.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
-  hsdram2.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_3;
+  hsdram2.Init.CASLatency = FMC_SDRAM_CAS_LATENCY_2;
   hsdram2.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;
   hsdram2.Init.SDClockPeriod = FMC_SDRAM_CLOCK_PERIOD_2;
-  hsdram2.Init.ReadBurst = FMC_SDRAM_RBURST_DISABLE;
+  hsdram2.Init.ReadBurst = FMC_SDRAM_RBURST_ENABLE;
   hsdram2.Init.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_0;
   /* SdramTiming */
   SdramTiming.LoadToActiveDelay = 2;
@@ -815,7 +848,7 @@ static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM
   /* Step 7: Program the external memory mode register */
   tmpmrd = (uint32_t)SDRAM_MODEREG_BURST_LENGTH_2 |
            SDRAM_MODEREG_BURST_TYPE_SEQUENTIAL |
-           SDRAM_MODEREG_CAS_LATENCY_3 |
+           SDRAM_MODEREG_CAS_LATENCY_2 |
            SDRAM_MODEREG_OPERATING_MODE_STANDARD |
            SDRAM_MODEREG_WRITEBURST_MODE_SINGLE;
 
@@ -920,6 +953,7 @@ void StartDefaultTask(void *argument)
   if (bank2_okay)
   {
     printf("Bank 2 64M, okay\n");
+    HAL_HSEM_Release(HSEM_ID_1, 0);
   }
   expansion_bus_set_led(exp, 0x0A);
 

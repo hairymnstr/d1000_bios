@@ -5,7 +5,7 @@
                 "Middlewares/Third_Party/FreeRTOS/Source/include",
                 "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
                 "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
-                "CM7/Core/Inc",
+                "CM4/Core/Inc",
                 "application/common/inc",
                 "Drivers/STM32H7xx_HAL_Driver/Inc",
                 "Drivers/CMSIS/Device/ST/STM32H7xx/Include",

@@ -57,6 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define DISPLAY_I2C_RST_Pin GPIO_PIN_5
+#define DISPLAY_I2C_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
