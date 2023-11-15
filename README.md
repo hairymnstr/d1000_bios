@@ -31,3 +31,5 @@ There's a minimal command line interface on the Console UART at 115200, 8n1.  I'
 * ps - gives a summary of the FreeRTOS task status
 * check-clocks - list the status of the RTOS tick, RTC clock and the profiling clock
 * dummy - just lists all the arguments passed to it for testing the CLI tokeniser
+
+The HDMI output is displaying "hello world" in the top left corner of a VESA standard 1024x768 60Hz display.

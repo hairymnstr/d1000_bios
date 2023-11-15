@@ -54,7 +54,8 @@ add_executable(${PROJ_NAME}_CM4
     ${CM4_CORE_SRC}
     ${DRIVER_FILES}
     ${CMAKE_SOURCE_DIR}/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c
-    ${CMAKE_SOURCE_DIR}/CM4/Core/Startup/startup_stm32h745bitx.s)
+    ${CMAKE_SOURCE_DIR}/CM4/Core/Startup/startup_stm32h745bitx.s
+    ${CMAKE_SOURCE_DIR}/application/CM4/src/console_8x16.c)
 
 target_compile_definitions(${PROJ_NAME}_CM4 PRIVATE
     -DCORE_CM4
@@ -63,7 +64,8 @@ target_compile_definitions(${PROJ_NAME}_CM4 PRIVATE
 
 target_include_directories(${PROJ_NAME}_CM4 PRIVATE
     ${CMAKE_SOURCE_DIR}/CM4/Core/Inc
-    ${COMMON_INCLUDES})
+    ${COMMON_INCLUDES}
+    ${CMAKE_SOURCE_DIR}/application/CM4/inc)
 
 target_compile_options(${PROJ_NAME}_CM4 PRIVATE
     ${CM4_CORE_FLAGS}

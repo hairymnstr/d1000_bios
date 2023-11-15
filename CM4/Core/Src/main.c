@@ -22,7 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-
+#include <string.h>
+#include "clut.h"
+#include "console_8x16.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -180,51 +182,60 @@ int main(void)
     printf("I2C error reading V_RES\r\n");
   }
 
-#define ROW_STRIDE (490 * 4)
+  HAL_LTDC_ConfigCLUT(&hltdc, (uint32_t *)term_colour_clut, 256, LTDC_LAYER_1);
+  HAL_LTDC_EnableCLUT(&hltdc, LTDC_LAYER_1);
 
-  // now write something to the layer buffers
+  // frame buffer is 8 bit/pixel with 24 bit CLUT defined above
   uint8_t *fb1 = (uint8_t *)0xD0000000;
 
-  for (int i=0;i<145;i++)
+  // blank the screen
+  memset(fb1, 0, 1024 * 768);
+
+#define SCREEN_WIDTH 1024
+  
+  if (0)
   {
-    for (int j=0;j<245;j++)
+    for (int i=0;i<1024 * 768 / 8;i++)
     {
-      fb1[i*ROW_STRIDE+j*4] = 0xff;
-      fb1[i*ROW_STRIDE+j*4+1] = 0xff;
-      fb1[i*ROW_STRIDE+j*4+2] = 0xff;
-      fb1[i*ROW_STRIDE+j*4+3] = 0xff;
+      for (int j=0;j<8;j++)
+      {
+        for (int k=0;k<8;k++)
+        {
+          fb1[i * 8 + j + k * 1024] = i & 0xff;
+        }
+      }
     }
   }
-  for (int i=0;i<145;i++)
+
+  if (1)
   {
-    for (int j=245;j<490;j++)
+    int cursor_x = 0;
+    int cursor_y = 0;
+
+    // Now write "Hello world" on the top left
+    for (char *c="hello world"; *c != '\0'; c++)
     {
-      fb1[i*ROW_STRIDE+j*4] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+1] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+2] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+3] = 0xff;
+      for (int i=0;i<16;i++)
+      {
+        for (int j=0;j<8;j++)
+        {
+          uint8_t px;
+          if (font[(int)*c][i] & (1 << (7-j)))
+          {
+            px = 0xff;
+          }
+          else
+          {
+            px = 0x00;
+          }
+          fb1[cursor_x * 8 + j + (cursor_y * 16 + i) * SCREEN_WIDTH] = px;
+        }
+      }
+      cursor_x ++;
+      putc(*c, stdout);
     }
   }
-  for (int i=145;i<290;i++)
-  {
-    for (int j=0;j<245;j++)
-    {
-      fb1[i*ROW_STRIDE+j*4] = 0xff;
-      fb1[i*ROW_STRIDE+j*4+1] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+2] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+3] = 0xff;
-    }
-  }
-  for (int i=145;i<290;i++)
-  {
-    for (int j=245;j<490;j++)
-    {
-      fb1[i*ROW_STRIDE+j*4] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+1] = 0x00;
-      fb1[i*ROW_STRIDE+j*4+2] = 0xff;
-      fb1[i*ROW_STRIDE+j*4+3] = 0xff;
-    }
-  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -323,18 +334,18 @@ static void MX_LTDC_Init(void)
   {
     Error_Handler();
   }
-  pLayerCfg.WindowX0 = 10;
-  pLayerCfg.WindowX1 = 500;
-  pLayerCfg.WindowY0 = 10;
-  pLayerCfg.WindowY1 = 300;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_ARGB8888;
+  pLayerCfg.WindowX0 = 0;
+  pLayerCfg.WindowX1 = 1024;
+  pLayerCfg.WindowY0 = 0;
+  pLayerCfg.WindowY1 = 768;
+  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_L8;
   pLayerCfg.Alpha = 255;
   pLayerCfg.Alpha0 = 0;
-  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;
-  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;
+  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
+  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
   pLayerCfg.FBStartAdress = 0xd0000000;
-  pLayerCfg.ImageWidth = 490;
-  pLayerCfg.ImageHeight = 290;
+  pLayerCfg.ImageWidth = 1024;
+  pLayerCfg.ImageHeight = 768;
   pLayerCfg.Backcolor.Blue = 0;
   pLayerCfg.Backcolor.Green = 0;
   pLayerCfg.Backcolor.Red = 0;
